@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IA de Conversação com GPT-3</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <style>
+    body {
+      color:#ooo;
+      font-family: Arial; 
+      background: url("https://static.vecteezy.com/ti/vetor-gratis/p1/3549556-espaco-galaxia-fundo-vetor.jpg") center/cover no-repeat;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      text-shadow: 0px 0px 10px #fff;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #chatbox {
+      height: 300px;
+      overflow-y: scroll;
+      border: 5px solid #000;
+      padding: 10px;
+      background: #ffffff
+    }
+
+    #userInput {
+      width: 80%;
+    }
+
+    button {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Teste de I.A</h1>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Digite sua mensagem..." autofocus />
+    <button onclick="sendMessage()">Enviar</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const chatbox = document.getElementById("chatbox");
+    const userInput = document.getElementById("userInput");
+
+    function addMessage(message, sender) {
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("message");
+      if (sender === "user") {
+        messageElement.classList.add("user-message");
+      } else {
+        messageElement.classList.add("ai-message");
+      }
+      messageElement.innerText = message;
+      chatbox.appendChild(messageElement);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function sendMessage() {
+      const message = userInput.value;
+      addMessage(message, "user");
+      userInput.value = "";
+
+      getAIResponse(message)
+        .then(response => {
+          addMessage(response, "ai");
+        })
+        .catch(error => {
+          console.error('Erro na solicitação da API do GPT-3:', error);
+          addMessage('Desculpe, ocorreu um erro ao obter a resposta da IA.', 'ai');
+        });
+    }
+
+    async function getAIResponse(message) {
+      const apiKey = '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';
+      const apiUrl = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+      const prompt = message;
+      const maxTokens = 50;
+
+      const response = await axios.post(apiUrl, {
+        prompt,
+        max_tokens: maxTokens
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+
+      const { choices } = response.data;
+      const aiResponse = choices[0].text.trim();
+      return aiResponse;
+    }
+  </script>
+</body>
+</html>
